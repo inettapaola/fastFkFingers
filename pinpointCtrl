@@ -1,0 +1,34 @@
+import maya.cmds as cmds
+
+# index selection to select first joint only
+selection = cmds.ls(selection=True) [0]
+
+# create nurbs circle at origin and name it jointname_ctrl
+ctrl_maker = cmds.curve(n = selection + '_ctrl', p=[(0, 0, -1), (0.393, 0, -0.948), (0.726, 0, -.726), (0.948, 0, -0.393), (1.026, 0, 0), (0.948, 0, 0.393), (0.726, 0, 0.726), (0.0161, 0, 1.552), (0, 0, 5.76), (-0.0161, 0, 1.552), (-0.726, 0, 0.726), (-0.948, 0, 0.393), (-1.026, 0, 0), (-0.948, 0, -0.393), (-0.726, 0, -0.726), (-0.393, 0, -0.943), (0, 0, -1)])
+
+#change pivot of curve to the tip of the shape
+cmds.xform(ctrl_maker, piv= (0, 0, 5.76))
+
+# match transform for nurbs circle to original joint
+cmds.matchTransform(ctrl_maker, selection, scl=False)
+
+# delete history
+cmds.delete(ctrl_maker, ch=True)
+
+# create padding
+group_name = cmds.group(n = selection + '_pad', em=True)
+
+# match orientation for pad and oginal joint
+cmds.matchTransform(group_name, selection) 
+
+#make pad house ctrl   
+cmds.parent(ctrl_maker, group_name)   
+
+cmds.xform(ctrl_maker, ro= (0, 180, 0))
+cmds.makeIdentity(ctrl_maker, apply=True)
+
+#Node editor connection  
+cmds.connectAttr(ctrl_maker + '.rotateX', selection + '.rotateX')
+cmds.connectAttr(ctrl_maker + '.rotateY', selection + '.rotateY')
+cmds.connectAttr(ctrl_maker + '.rotateZ', selection + '.rotateZ')
+
